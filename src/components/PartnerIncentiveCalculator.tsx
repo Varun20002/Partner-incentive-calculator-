@@ -65,7 +65,7 @@ export default function PartnerIncentiveCalculator() {
   // --- State ---
   const [newUsers, setNewUsers] = useState(100);
   const [volPerUser, setVolPerUser] = useState(1000000);
-  const [sharePercent, setSharePercent] = useState<20 | 25 | 30>(30);
+  const sharePercent = 20; // Fixed at 20%
 
   // --- Optimized Calculations ---
   
@@ -180,10 +180,10 @@ export default function PartnerIncentiveCalculator() {
                   <input
                     type="number"
                     min="0"
-                    max="500"
+                    max="200"
                     value={newUsers}
                     onChange={(e) => {
-                      const val = Math.min(500, Math.max(0, Number(e.target.value)));
+                      const val = Math.min(200, Math.max(0, Number(e.target.value)));
                       setNewUsers(val);
                     }}
                     className="w-16 text-center bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-sm font-bold border border-blue-100 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all appearance-none"
@@ -195,7 +195,7 @@ export default function PartnerIncentiveCalculator() {
                 <input
                   type="range"
                   min="0"
-                  max="500"
+                  max="200"
                   step="1"
                   value={newUsers}
                   onChange={(e) => {
@@ -206,8 +206,8 @@ export default function PartnerIncentiveCalculator() {
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-2 font-medium">
                   <span>0</span>
-                  <span>250</span>
-                  <span>500</span>
+                  <span>100</span>
+                  <span>200</span>
                 </div>
               </div>
             </div>
@@ -221,15 +221,14 @@ export default function PartnerIncentiveCalculator() {
               <div className="relative group">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium group-focus-within:text-blue-500 transition-colors">₹</span>
                 <input
-                  type="number"
-                  min="0"
-                  value={volPerUser}
+                  type="text"
+                  value={new Intl.NumberFormat('en-IN').format(volPerUser)}
                   onChange={(e) => {
-                    // Handle empty input or invalid numbers gracefully
-                    const val = e.target.value === '' ? 0 : Number(e.target.value);
+                    const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                    const val = rawValue === '' ? 0 : Number(rawValue);
                     setVolPerUser(Math.max(0, val));
                   }}
-                  className="w-full pl-9 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono text-gray-900 font-medium"
+                  className="w-full pl-9 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium"
                 />
               </div>
             </div>
@@ -241,27 +240,12 @@ export default function PartnerIncentiveCalculator() {
                 Revenue Share
               </label>
               <div className="flex bg-gray-100/80 p-1.5 rounded-2xl relative">
-                {[20, 25, 30].map((pct) => (
-                  <button
-                    key={pct}
-                    onClick={() => setSharePercent(pct as 20 | 25 | 30)}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 relative z-10",
-                      sharePercent === pct
-                        ? "text-blue-600"
-                        : "text-gray-500 hover:text-gray-700"
-                    )}
-                  >
-                    {sharePercent === pct && (
-                      <motion.div
-                        layoutId="tab-highlight"
-                        className="absolute inset-0 bg-white rounded-xl shadow-sm border border-gray-200/50"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                    <span className="relative z-10">{pct}%</span>
-                  </button>
-                ))}
+                <button
+                  disabled
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 relative z-10 text-blue-600 bg-white shadow-sm border border-gray-200/50"
+                >
+                  <span className="relative z-10">20%</span>
+                </button>
               </div>
             </div>
 
@@ -269,7 +253,7 @@ export default function PartnerIncentiveCalculator() {
             <div className="pt-6 border-t border-gray-100">
                <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Total Volume (INR)</span>
-                  <span className="font-mono font-medium text-gray-700">
+                  <span className="font-medium text-gray-700">
                     <AnimatedNumber value={totalVolINR} />
                   </span>
                </div>
@@ -304,21 +288,21 @@ export default function PartnerIncentiveCalculator() {
           {/* Breakdown Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card 
-              title="Acquisition" 
+              title="New Users" 
               value={acquisitionIncome} 
               icon={<Users className="w-4 h-4" />}
               color="blue"
               delay={0.1}
             />
             <Card 
-              title="Slab Incentive" 
+              title="Volume Incentives" 
               value={slabIncome} 
               icon={<Target className="w-4 h-4" />}
               color="purple"
               delay={0.2}
             />
             <Card 
-              title="Commission" 
+              title="Brokerage" 
               value={commissionIncome} 
               icon={<DollarSign className="w-4 h-4" />}
               color="orange"
