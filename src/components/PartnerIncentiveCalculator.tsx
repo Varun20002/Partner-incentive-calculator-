@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useSpring, useTransform } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -132,16 +132,6 @@ export default function PartnerIncentiveCalculator() {
     }
     prevSlabIndexRef.current = slabIndex;
   }, [slabIndex]);
-
-  // --- Next Goal Logic (Optimized) ---
-  const nextGoalData = useMemo(() => {
-    // Logic removed as per user request to remove the card
-    return null;
-  }, [slabIndex, totalVolUSD]);
-
-  const renderNextGoal = () => {
-    return null; // Logic removed
-  };
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 md:p-8 font-sans">
@@ -325,12 +315,6 @@ interface CardProps {
 }
 
 function Card({ title, value, color, icon, delay = 0 }: CardProps) {
-  const colorStyles = {
-    blue: "bg-blue-50 text-blue-900 border-blue-100",
-    purple: "bg-purple-50 text-purple-900 border-purple-100",
-    orange: "bg-orange-50 text-orange-900 border-orange-100",
-  };
-  
   const iconStyles = {
     blue: "bg-blue-100 text-blue-600",
     purple: "bg-purple-100 text-purple-600",
