@@ -5,12 +5,12 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { 
   Users, 
-  DollarSign, 
   Percent, 
   Trophy, 
   Target, 
   TrendingUp, 
-  Calculator 
+  Calculator,
+  IndianRupee 
 } from 'lucide-react';
 
 // --- Utility ---
@@ -66,7 +66,7 @@ export default function PartnerIncentiveCalculator() {
   const [newUsers, setNewUsers] = useState(100);
   // Volume Inputs
   const [avgMargin, setAvgMargin] = useState(1000);
-  const [leverage, setLeverage] = useState(10);
+  const [leverage, setLeverage] = useState(25);
   const [tradesPerUser, setTradesPerUser] = useState(10);
   
   const sharePercent = 20; // Fixed at 20%
@@ -218,7 +218,7 @@ export default function PartnerIncentiveCalculator() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Average Margin per User */}
                 <div className="space-y-2">
-                   <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Margin</label>
+                   <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">AVG Margin/User</label>
                    <div className="relative group">
                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₹</span>
                      <input
@@ -237,19 +237,29 @@ export default function PartnerIncentiveCalculator() {
                 {/* Leverage */}
                 <div className="space-y-2">
                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Leverage</label>
-                   <div className="relative">
-                     <select
-                       value={leverage}
-                       onChange={(e) => setLeverage(Number(e.target.value))}
-                       className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium appearance-none cursor-pointer"
-                     >
-                       {[10, 15, 20, 25, 30].map(val => (
-                         <option key={val} value={val}>{val}x</option>
-                       ))}
-                     </select>
-                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                     </div>
+                   <div className="relative group">
+                     <input
+                       type="number"
+                       min="1"
+                       max="100"
+                       value={leverage === 0 ? '' : leverage}
+                       onChange={(e) => {
+                         const val = e.target.value;
+                         if (val === '') {
+                           setLeverage(0);
+                           return;
+                         }
+                         const numVal = Number(val);
+                         setLeverage(numVal);
+                       }}
+                       onBlur={() => {
+                         let finalVal = Math.max(1, Math.min(100, leverage));
+                         if (leverage === 0) finalVal = 1;
+                         setLeverage(finalVal);
+                       }}
+                       className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium"
+                     />
+                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">x</span>
                    </div>
                 </div>
 
@@ -349,7 +359,7 @@ export default function PartnerIncentiveCalculator() {
             <Card 
               title="Brokerage" 
               value={commissionIncome} 
-              icon={<DollarSign className="w-4 h-4" />}
+              icon={<IndianRupee className="w-4 h-4" />}
               color="orange"
               delay={0.3}
             />
