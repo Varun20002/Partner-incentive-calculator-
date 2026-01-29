@@ -64,10 +64,19 @@ function AnimatedNumber({ value, currency = true }: { value: number, currency?: 
 export default function PartnerIncentiveCalculator() {
   // --- State ---
   const [newUsers, setNewUsers] = useState(100);
-  const [volPerUser, setVolPerUser] = useState(1000000);
+  // Volume Inputs
+  const [avgMargin, setAvgMargin] = useState(1000);
+  const [leverage, setLeverage] = useState(10);
+  const [tradesPerUser, setTradesPerUser] = useState(10);
+  
   const sharePercent = 20; // Fixed at 20%
 
   // --- Optimized Calculations ---
+
+  // 0. Volume per User (Derived)
+  const volPerUser = useMemo(() => {
+    return avgMargin * leverage * tradesPerUser;
+  }, [avgMargin, leverage, tradesPerUser]);
   
   // 1. Total Volume INR
   const totalVolINR = useMemo(() => {
@@ -134,30 +143,27 @@ export default function PartnerIncentiveCalculator() {
   }, [slabIndex]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 md:p-8 font-sans">
+    <div className="w-full max-w-7xl mx-auto p-4 md:p-6 font-sans">
       
       {/* Header */}
-      <div className="mb-10 text-center md:text-left">
+      <div className="mb-6 text-center md:text-left">
         <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-          <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
-            <Calculator className="w-8 h-8 text-gray-900" />
+          <div className="p-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
+            <Calculator className="w-6 h-6 text-gray-900" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Partner Calculator</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Partner Calculator</h1>
         </div>
-        <p className="text-gray-600 text-lg max-w-2xl">
+        <p className="text-gray-600 text-base max-w-2xl">
           Simulate your potential earnings based on user acquisition and volume.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Inputs (4 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/10 p-6 md:p-8 space-y-8 border border-white/50">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
-              Configuration
-            </h2>
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/10 p-5 md:p-6 space-y-6 border border-white/50">
+            {/* Removed Configuration Header */}
             
             {/* New Users Slider */}
             <div className="space-y-4">
@@ -202,24 +208,73 @@ export default function PartnerIncentiveCalculator() {
               </div>
             </div>
 
-            {/* Volume per User Input */}
+            {/* Volume Configuration */}
             <div className="space-y-4">
-              <label className="font-semibold text-gray-700 flex items-center gap-2">
+              <h3 className="font-semibold text-gray-700 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-emerald-500" />
-                Volume per User (INR)
-              </label>
-              <div className="relative group">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium group-focus-within:text-blue-500 transition-colors">₹</span>
-                <input
-                  type="text"
-                  value={new Intl.NumberFormat('en-IN').format(volPerUser)}
-                  onChange={(e) => {
-                    const rawValue = e.target.value.replace(/[^0-9]/g, '');
-                    const val = rawValue === '' ? 0 : Number(rawValue);
-                    setVolPerUser(Math.max(0, val));
-                  }}
-                  className="w-full pl-9 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium"
-                />
+                Volume Calculation
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Average Margin per User */}
+                <div className="space-y-2">
+                   <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Margin</label>
+                   <div className="relative group">
+                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₹</span>
+                     <input
+                       type="text"
+                       value={new Intl.NumberFormat('en-IN').format(avgMargin)}
+                       onChange={(e) => {
+                         const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                         const val = rawValue === '' ? 0 : Number(rawValue);
+                         setAvgMargin(Math.max(0, val));
+                       }}
+                       className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium"
+                     />
+                   </div>
+                </div>
+
+                {/* Leverage */}
+                <div className="space-y-2">
+                   <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Leverage</label>
+                   <div className="relative">
+                     <select
+                       value={leverage}
+                       onChange={(e) => setLeverage(Number(e.target.value))}
+                       className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium appearance-none cursor-pointer"
+                     >
+                       {[10, 15, 20, 25, 30].map(val => (
+                         <option key={val} value={val}>{val}x</option>
+                       ))}
+                     </select>
+                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                     </div>
+                   </div>
+                </div>
+
+                {/* Monthly Trades per User */}
+                <div className="space-y-2 md:col-span-2">
+                   <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Trades / Month / User</label>
+                   <input
+                     type="text"
+                     value={tradesPerUser}
+                     onChange={(e) => {
+                        const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                        const val = rawValue === '' ? 0 : Number(rawValue);
+                        setTradesPerUser(Math.max(0, val));
+                     }}
+                     className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium"
+                   />
+                </div>
+              </div>
+
+              {/* Calculated Volume per User Display */}
+              <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 flex justify-between items-center text-sm">
+                <span className="text-emerald-700 font-medium">Calculated Volume / User</span>
+                <span className="text-emerald-800 font-bold">
+                  <AnimatedNumber value={volPerUser} />
+                </span>
               </div>
             </div>
 
@@ -252,31 +307,31 @@ export default function PartnerIncentiveCalculator() {
         </div>
 
         {/* Right Column: Results (7 cols) */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-4 flex flex-col h-full">
           
           {/* Net Total Card */}
           <motion.div 
             layout
-            className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 lg:p-16 text-white relative overflow-hidden group border border-white/10 min-h-[320px] flex flex-col justify-center"
+            className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-2xl p-6 md:p-8 lg:p-10 text-white relative overflow-hidden group border border-white/10 flex-grow flex flex-col justify-center min-h-[300px]"
           >
             {/* Background Effects */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/30 transition-colors duration-500"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -ml-16 -mb-16 group-hover:bg-blue-500/30 transition-colors duration-500"></div>
             
-            <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-6">
-              <h3 className="text-emerald-300 font-semibold tracking-wider uppercase text-sm flex items-center gap-2 bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-500/20">
-                <Trophy className="w-4 h-4" />
+            <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-4">
+              <h3 className="text-emerald-300 font-semibold tracking-wider uppercase text-xs flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                <Trophy className="w-3 h-3" />
                 Net Monthly Earnings
               </h3>
-              <div className="text-5xl md:text-7xl lg:text-8xl font-bold font-tight tracking-tight drop-shadow-lg">
+              <div className="text-5xl md:text-6xl lg:text-7xl font-bold font-tight tracking-tight drop-shadow-lg">
                 <AnimatedNumber value={netTotal} />
               </div>
-              <p className="text-gray-400 text-base md:text-lg">Total estimated payout based on current performance</p>
+              <p className="text-gray-400 text-sm md:text-base">Total estimated payout based on current performance</p>
             </div>
           </motion.div>
 
           {/* Breakdown Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <Card 
               title="New Users" 
               value={acquisitionIncome} 
