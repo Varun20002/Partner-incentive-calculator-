@@ -106,6 +106,12 @@ export default function PartnerIncentiveCalculator() {
   );
   const netRevenue = useMemo(() => totalFees * 0.5, [totalFees]);
 
+  /** Amount shown in Platform Fee Distribution header (gross = full fees; net = after liquidity). */
+  const feeDistributionDisplayTotal = useMemo(
+    () => (mode === 'gross' ? totalFees : netRevenue),
+    [mode, totalFees, netRevenue]
+  );
+
   const partnerShare = useMemo(() => {
     if (mode === 'gross') return totalFees * (grossBrokeragePct / 100);
     return netRevenue * (netBrokeragePct / 100);
@@ -375,7 +381,7 @@ export default function PartnerIncentiveCalculator() {
           {/* Platform Fee Distribution */}
           <FeeDistribution
             mode={mode}
-            totalFees={totalFees}
+            displayFeeTotal={feeDistributionDisplayTotal}
             liquidityPct={liquidityPct}
             companyPct={companyPct}
             brokeragePct={brokeragePct}
@@ -455,7 +461,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 interface FeeDistributionProps {
   mode: Mode;
-  totalFees: number;
+  /** Gross: full platform fees. Net: pool after 50% liquidity (same basis as the bar). */
+  displayFeeTotal: number;
   liquidityPct: number;
   companyPct: number;
   brokeragePct: number;
@@ -463,7 +470,7 @@ interface FeeDistributionProps {
 
 function FeeDistribution({
   mode,
-  totalFees,
+  displayFeeTotal,
   liquidityPct,
   companyPct,
   brokeragePct,
@@ -510,10 +517,10 @@ function FeeDistribution({
         </div>
         <div className="flex shrink-0 items-baseline justify-between gap-3 border-t border-gray-100 pt-2 sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
           <div className="text-[11px] font-medium uppercase tracking-wider text-gray-500 sm:text-right">
-            Total Fees
+            {mode === 'gross' ? 'Total fees' : 'After liquidity'}
           </div>
           <div className="text-right text-base font-bold tabular-nums text-gray-900 sm:text-sm">
-            <AnimatedNumber value={totalFees} />
+            <AnimatedNumber value={displayFeeTotal} />
           </div>
         </div>
       </div>
